@@ -225,25 +225,23 @@ class RequestBuilder
         $client = new Client($this->getGuzzleOptions());
 
         try {
-            $response = $client->request($this->method, $this->getUrl(), $data);
+            $request = $client->createRequest($this->method, $this->getGuzzleOptions()['base_uri'], $data);
+            $response = $client->send($request);
         } catch (RequestException $e) {
             throw $e;
         }
 
         switch ($this->returnType) {
             case 'headers':
-            return $response->getHeaders();
+                return $response->getHeaders();
 
             case 'object':
-            return $response;
+                return $response;
 
             case 'body':
             default:
                 $body = (string) $response->getBody();
-                if (strpos($response->getHeaderLine('content-type'), 'json') !== false) {
-                    return json_decode($body, true);
-                }
-            return $body;
+                return json_decode($body, true);
         }
     }
 
